@@ -64,3 +64,13 @@ f = function([a,b],[diff, abs_diff, diff_squared, diffc])
 
 t5 = timeit.Timer('f([[22,5],[5,10]],[[-5,22],[2,1]])', 'from __main__ import *')
 print('Runtime for multifunction output', t5.repeat(2,4))
+
+''' Shared Variables'''
+from theano import shared
+state = shared(1)
+mod = T.scalar('mod')
+fun = function([], updates=[(state,7+3)])
+v = T.scalar(dtype=state.dtype)
+funG = state + (4/v)/mod
+test = function([v,mod], funG, givens=[(state,v)])    # givens used to replace a variable
+print(test)
