@@ -14,67 +14,39 @@ str2floatv = np.vectorize(str2float)
 # Does an elementwise conversion of the string values to floats of columns 1 and 2, birthrates and per capita income
 birth = str2floatv(birth[:,[1,2]]) # the 1 column is birthrates, the second column is income/capita
 birth = preprocessing.scale(birth)
+x = birth[:,0]
+y = birth[:,1]
 # GRADIENT DESCENT
 
-# Returns the gradient for A
-def derivA(a, B, x, y):
-    j = 1/(2*float(birth.shape[0])) * T.sum(T.sqr(a + (B * x) - y))
-    gj = T.grad(j, a)
-    return gj
-# Returns the gradient for B
-def derivB(A, b, x, y):
-    j = 1/(2*float(birth.shape[0])) * T.sum(T.sqr(A + (b * x) - y))
-    gj = T.grad(j, b)
-    return gj
-# Returns the loss function
-def lossfn():
-    xT = T.vector('xT')
-    yT = T.vector('yT')
-    a = T.scalar('a')
-    b = T.scalar('b')
-    f = 1/(2*float(birth.shape[0])) * T.sum(T.sqr(a + (b * xT) - yT))
-    fn = theano.function([a, b,xT, yT], f)
-    return fn
-# Calculates the loss
-def lossX(a, b, x, y):
-    return lossfn()(a, b, x, y)
-# Returns the update value for the specified variable and gradient d
-def update(d,p,var,learning_rate):
-    m = T.scalar('m')
-    fd = theano.function([var],d)
-    f = learning_rate * fd(p)
-    return f
-# Linear regression through gradient descent to create model y = A + Bx
-def gradientDescent(iterations):
-    x = birth[:,0]
-    y = birth[:,1]
+X = T.vector()
+Y = T.vector()
 
-    a = T.scalar('a')
-    b = T.scalar('b')
-    learning_rate = 1
-    paramA = 0
-    paramB = 0
-    tempParamA = 0
-    tempParamB = 0
-    for it in range(iterations):
-        loss = lossX(paramA, paramB, x, y)
-        d_loss_wrt_paramsA = derivA(a, paramB, x, y) # The A gradient
-        d_loss_wrt_paramsB = derivB(paramA, b, x, y) # The B gradient
-        tempParamA -= update(d_loss_wrt_paramsA, paramA,a,learning_rate) # Updates tempParamA
-        tempParamB -= update(d_loss_wrt_paramsB, paramB,b, learning_rate) # Updates tempParamB
-        paramA = tempParamA
-        paramB = tempParamB
-        print(d_loss_wrt_paramsA, d_loss_wrt_paramsB)
-    print('Loss:',loss)
-    return paramA, paramB
+theta_0 = theano.shared(0.)
+theta_1 = theano.shared(0.)
+
+
+cost = (1/(float(birth.shape[0]))) * T.sum(T.sqr(theta_0 + theta_1 * X - Y))
+gradient_t0 = T.grad(cost=cost, wrt=theta_0)     # Optimize with Jacobian later
+gradient_t1 = T.grad(cost=cost, wrt=theta_1)
+
+updates_t0 = [(theta_0, theta_0 - gradient_t0 * 0.01)]
+updates_t1 = [(theta_1, theta_1 - gradient_t1 * 0.01)]
+
+train_t0 = theano.function(inputs=[X, Y], outputs = [], updates = updates_t0, allow_input_downcast = True)
+train_t1 = theano.function(inputs=[X, Y], outputs = [], updates = updates_t1, allow_input_downcast = True)
+
+
+for i in range(100):
+    # tempt0 = theta_0.get_value() # May use with givens to train thetas simultaneously
+    # tempt1 = theta_1.get_value()
+    train_t0(x,y)
+    train_t1(x,y)
 
 
 
-
-m, b = gradientDescent(40)
-y = m*birth[:,0] + b
+y = theta_1.get_value()*birth[:,0] + theta_0.get_value()
 plt.scatter(birth[:,0],birth[:,1])
-plt.plot(birth[:,0], y)
+plt.plot(x, y)
 plt.show()
 
 
