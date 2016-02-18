@@ -37,16 +37,16 @@ train_t1 = theano.function(inputs=[X, Y], outputs = [], updates = updates_t1, al
 
 
 for i in range(100):
-    # tempt0 = theta_0.get_value() # May use with givens to train thetas simultaneously
-    # tempt1 = theta_1.get_value()
+    tempTheta_0 = theta_0.get_value()
     train_t0(x,y)
+    theta_0a = theta_0.get_value()
+    theta_0.set_value(tempTheta_0)
     train_t1(x,y)
+    theta_0.set_value(theta_0a)
 
-
-
-y = theta_1.get_value()*birth[:,0] + theta_0.get_value()
+z = theta_1.get_value()*birth[:,0] + theta_0.get_value()
 plt.scatter(birth[:,0],birth[:,1])
-plt.plot(x, y)
+plt.plot(x, z)
 plt.show()
 
 
