@@ -2,6 +2,7 @@ import numpy as np
 import theano.tensor as T
 import theano
 from sklearn import preprocessing
+
 # Loads the birthrate data in string format
 # Dataset from http://www.stat.ufl.edu/~winner/datasets.html
 birth = np.loadtxt('birthrate.dat', dtype=np.str)
@@ -29,20 +30,14 @@ cost = (1/(float(birth.shape[0]))) * T.sum(T.sqr(theta_0 + theta_1 * X - Y))
 gradient_t0 = T.grad(cost=cost, wrt=theta_0)     # Optimize with Jacobian later
 gradient_t1 = T.grad(cost=cost, wrt=theta_1)
 
-updates_t0 = [(theta_0, theta_0 - gradient_t0 * 0.01)]
-updates_t1 = [(theta_1, theta_1 - gradient_t1 * 0.01)]
+updates_t0_t1 = [(theta_0, theta_0 - gradient_t0 * 0.01), (theta_1, theta_1 - gradient_t1 * 0.01)]
+# updates_t1 = []
 
-train_t0 = theano.function(inputs=[X, Y], outputs = [], updates = updates_t0, allow_input_downcast = True)
-train_t1 = theano.function(inputs=[X, Y], outputs = [], updates = updates_t1, allow_input_downcast = True)
-
+train_t0_t1 = theano.function(inputs=[X, Y], outputs = [], updates = updates_t0_t1, allow_input_downcast = True)
+# train_t1 = theano.function(inputs=[X, Y], outputs = [], updates = updates_t1, allow_input_downcast = True)
 
 for i in range(100):
-    tempTheta_0 = theta_0.get_value()
-    train_t0(x,y)
-    theta_0a = theta_0.get_value()
-    theta_0.set_value(tempTheta_0)
-    train_t1(x,y)
-    theta_0.set_value(theta_0a)
+   train_t0_t1(x,y)
 
 if __name__ == '__main__':
     z = theta_1.get_value()*birth[:,0] + theta_0.get_value()
