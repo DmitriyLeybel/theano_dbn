@@ -44,11 +44,11 @@ for i in range(100):
     train_t1(x,y)
     theta_0.set_value(theta_0a)
 
-z = theta_1.get_value()*birth[:,0] + theta_0.get_value()
-plt.scatter(birth[:,0],birth[:,1])
-plt.plot(x, z)
-plt.show()
-
+if __name__ == '__main__':
+    z = theta_1.get_value()*birth[:,0] + theta_0.get_value()
+    plt.scatter(birth[:,0],birth[:,1])
+    plt.plot(x, z)
+    plt.show()
 
 
 # STOCHASTIC GRADIENT DESCENT - TO BE IMPLEMENTED
