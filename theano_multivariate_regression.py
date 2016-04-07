@@ -10,7 +10,9 @@ from sklearn.preprocessing import MinMaxScaler
 
 wineArray = np.loadtxt('wine.data',dtype=float,delimiter=',')
 wineX = MinMaxScaler().fit_transform(wineArray[:,2:])
+wineX = np.insert(wineX, 0, np.ones(wineX.shape[0]), axis = 1)
 wineY = wineArray[:,1]
+
 def str2float(x):
     return float(x)
 # # Vectorizes the str2float function
@@ -19,7 +21,7 @@ def str2float(x):
 # birth = str2floatv(birth[:,[1,2]]) # the 1 column is birthrates, the second column is income/capita
 # birth = preprocessing.scale(birth)
 def multiregression(input_features, output):
-    global cost, x_matrix, theta_vec, grad_list
+    global cost, x_matrix, theta_vec, grad_list, updates, train
     feature_num = input_features.shape[1]
     x_matrix = T.matrix()
     # x_vec.insert(0, float(1))
@@ -38,7 +40,10 @@ def multiregression(input_features, output):
 #
     cost = (1/(float(input_features.shape[0]))) * T.sum(T.sqr(T.dot(theta_vec, x_matrix) - y_vec))
     ze = theta_vec[0]
-    grad_list = T.grad(cost=cost, wrt = theta_vec) # for x in range(theta_num)]
+    grad_list = T.grad(cost=cost, wrt = theta_vec)
+    updates = [(theta_vec, T.set_subtensor(theta_vec[x],theta_vec[x] - grad_list[x] * 0.01)) for x in range(theta_num)]
+    train = theano.function(inputs=[x_matrix, y_vec], outputs =[], updates=updates)
+
 
     # [T.grad(cost=cost, wrt=theta) for theta in  ]
 # cost = (1/(float(birth.shape[0]))) * T.sum(T.sqr(theta_0 + theta_1 * X - Y))
